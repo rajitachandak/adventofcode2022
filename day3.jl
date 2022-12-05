@@ -38,4 +38,3 @@ for i in 1:length(badges)
 end
 println("Part 2 total:")
 println(part2score)
-#end
