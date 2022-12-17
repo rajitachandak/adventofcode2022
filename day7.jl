@@ -4,45 +4,46 @@ mutable struct Directory
     name::String
     parent::String
     files::Dict
+    sub_dirs::Dict
     dir_size::Int
 end
 
-mutable struct File
-    name::String
-    parent_dir::String
-    file_size::Int
-end
-
-function new_file(name, parent_dir, file_size)
-    name = File(name, parent_dir, file_size)
-end
-
-function new_dir(name, parent, file_list, dir_size)
-    name = Directory(name, parent, file_list, dir_size)
+function new_dir(name, parent, file_list, sub_dirs, dir_size)
+    name = Directory(name, parent, file_list, sub_dirs, dir_size)
 end
 
 #establishing file system
-global system = Dict("/" => Directory("/", "", Dict(), 0))
-global files = Dict()
-global dirs = Dict()
+global system = Dict("/" => Directory("/", "", Dict(), Dict(), 0))
 
 #initialzing directories and files
-global parent = "/"
+global parent = ""
+global curr_dir = "/"
+global files = Dict()
+global dirs = ["/"]
+global dir = new_dir(curr_dir, parent, Dict(), Dict(), 0)
 global i = 1
 while i < length(f)+1
     line = f[i]
     if startswith(line, r"\$ cd [a-z]")
-        global parent = chop(line, head=5, tail=0)
+        global parent = deepcopy(curr_dir)
+        global curr_dir = chop(line, head=5, tail=0)
+        push!(dirs, curr_dir)
+        global dir = new_dir(curr_dir, parent, Dict(), Dict(), 0)
+    end
+    if startswith(line,  "\$ cd ..")
+        global curr_dir = pop!(dirs)
     end
     if startswith(line, r"[0-9]")
         l = split(line)
         file_name = l[2]
-        global files[file_name] = new_file(l[2], parent, parse(Int, l[1]))
+        f_size = parse(Int, l[1])
+        dir.files[file_name] = f_size
     end
     if startswith(line, r"dir")
         l = split(line)
         dir_name = l[2]
-        global dirs[dir_name] = new_dir(l[2], parent, Dict(), 0)
+        dir.sub_dirs[dir_name] = dir_name
     end
+    println(dir)
     global i +=1
 end
