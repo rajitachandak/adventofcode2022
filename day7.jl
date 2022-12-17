@@ -3,6 +3,7 @@ f = readlines("day7.txt")
 mutable struct Directory
     name::String
     parent::String
+    files::Dict
     dir_size::Int
 end
 
@@ -10,6 +11,14 @@ mutable struct File
     name::String
     dir::Directory
     file_size::Int
+end
+
+function files(name, parent_dir, file_size)
+    name = File(name, parent_dir, file_size)
+end
+
+function dirs(name, parent, file_list, dir_size)
+    name = Directory(name, parent, file_list, dir_size)
 end
 
 system = Directory("/", "", 0)
