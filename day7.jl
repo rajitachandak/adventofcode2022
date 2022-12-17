@@ -43,4 +43,21 @@ function total_size(threshold, dirs)
 end
 
 part1 = total_size(100000, sizes)
-println("Part 1:", part1)
+println("Part 1: ", part1)
+
+
+#Part 2
+#free memory
+m = 70000000 - sum(sizes[1])
+
+function smallest_dir(threshold, dirs)
+    dir_size = []
+    for i in dirs
+        if i.second>=threshold
+            push!(dir_size,  i.second)
+        end
+    end
+    return(minimum(dir_size))
+end
+
+println("Part 2: ", smallest_dir(30000000-m, sizes))
