@@ -8,27 +8,26 @@ for l in f
 end
 
 #initialzing directories and files
-global sizes = Dict("/" => 0)
-dirs = ["/"]
+global sizes = Dict(collect(1:length(dir_list)) .=> 0)
+global idx = [1]
 for i in 1:length(f)
     line = f[i]
     if startswith(line, r"\$ cd [a-z]")
-        global curr_dir = chop(line, head=5, tail=0)
-        push!(dirs, curr_dir)
-        global sizes[curr_dir] = 0
+        push!(idx, i)
+        global sizes[i] = 0
     end
 
     if startswith(line, r"[0-9]")
         l = split(line)
         file_name = l[2]
         f_size = parse(Int, l[1])
-        for r in dirs
-            sizes[r] += f_size
+        for j in idx
+            sizes[j] += f_size
         end
     end
 
     if startswith(line,  "\$ cd ..")
-        global curr_dir = pop!(dirs)
+        pop!(idx)
     end
 end
 
@@ -42,4 +41,6 @@ function total_size(threshold, dirs)
     end
     return (sum)
 end
-println(total_size(100000, sizes))
+
+part1 = total_size(100000, sizes)
+println("Part 1:", part1)
