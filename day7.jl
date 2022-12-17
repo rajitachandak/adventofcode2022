@@ -1,49 +1,45 @@
 f = readlines("day7.txt")
 
-mutable struct Directory
-    name::String
-    parent::String
-    files::Dict
-    sub_dirs::Dict
-    dir_size::Int
+dir_list =["/"]
+for l in f
+    if startswith(l, r"\$ cd [a-z]")
+        push!(dir_list, chop(l, head=5, tail=0))
+    end
 end
-
-function new_dir(name, parent, file_list, sub_dirs, dir_size)
-    name = Directory(name, parent, file_list, sub_dirs, dir_size)
-end
-
-#establishing file system
-global system = Dict("/" => Directory("/", "", Dict(), Dict(), 0))
 
 #initialzing directories and files
-global parent = ""
-global curr_dir = "/"
-global files = Dict()
-global dirs = ["/"]
-global dir = new_dir(curr_dir, parent, Dict(), Dict(), 0)
-global i = 1
-while i < length(f)+1
+global sizes = Dict("/" => 0)
+dirs = ["/"]
+for i in 1:length(f)
     line = f[i]
     if startswith(line, r"\$ cd [a-z]")
-        global parent = deepcopy(curr_dir)
         global curr_dir = chop(line, head=5, tail=0)
         push!(dirs, curr_dir)
-        global dir = new_dir(curr_dir, parent, Dict(), Dict(), 0)
+        global sizes[curr_dir] = 0
     end
-    if startswith(line,  "\$ cd ..")
-        global curr_dir = pop!(dirs)
-    end
+
     if startswith(line, r"[0-9]")
         l = split(line)
         file_name = l[2]
         f_size = parse(Int, l[1])
-        dir.files[file_name] = f_size
+        for r in dirs
+            sizes[r] += f_size
+        end
     end
-    if startswith(line, r"dir")
-        l = split(line)
-        dir_name = l[2]
-        dir.sub_dirs[dir_name] = dir_name
+
+    if startswith(line,  "\$ cd ..")
+        global curr_dir = pop!(dirs)
     end
-    println(dir)
-    global i +=1
 end
+
+
+function total_size(threshold, dirs)
+    sum = 0
+    for i in dirs
+        if i.second<=threshold
+            sum+=i.second
+        end
+    end
+    return (sum)
+end
+println(total_size(100000, sizes))
