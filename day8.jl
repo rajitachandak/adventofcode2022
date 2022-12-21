@@ -1,8 +1,6 @@
 f = readlines("day8.txt")
 n = length(f)
 m = length(f[1])
-println(n)
-println(m)
 
 f_mat = Matrix{Int}(undef, (n, m))
 for i in 1:length(f)
@@ -56,6 +54,45 @@ total_vis = top_vis .|| bottom_vis .|| right_vis .|| left_vis
 println("Part 1: ", sum(total_vis))
 
 
+#Part 2
+function max_dis(vec)
+    n = length(vec)
+
+    for i in (n-1):-1:1
+        if vec[i] >= vec[n]
+            return(n-i)
+        end
+    end
+    return(n-1)
+end
+
+function distance(mat)
+    (n, m) = size(mat)
+    dis = Matrix{Int}(undef,  (n, m))
+
+    for i in 1:n
+        for j in 1:m
+            if i == 1
+                dis[i, j] = 0
+            else
+                dis[i, j] = max_dis(mat[1:i, j])
+            end
+        end
+    end
+
+    return(dis)
+end
+
 function scenic_score(mat)
 
+    top_dis = distance(mat)
+    bottom_dis = reverse(distance(reverse(mat, dims =1)), dims = 1)
+    right_dis = reverse(distance(reverse(mat', dims = 1)), dims = 1)'
+    left_dis = reverse(distance(reverse(mat', dims = 2)), dims = 2)'
+
+    total_dis = top_dis .* bottom_dis .* right_dis .* left_dis
+
+    return(maximum(total_dis))
 end
+
+println("Part 2: ", scenic_score(f_mat))
