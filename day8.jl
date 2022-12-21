@@ -1,9 +1,8 @@
 f = readlines("day8.txt")
 n = length(f)
 m = length(f[1])
-
-global n_vis = n + 3*(n-1)
-println(n_vis)
+println(n)
+println(m)
 
 f_mat = Matrix{Int}(undef, (n, m))
 for i in 1:length(f)
@@ -13,20 +12,50 @@ for i in 1:length(f)
 end
 
 
-function running_max(mat)
+function current_max(mat)
     (n, m) = size(mat)
-    running_max = Matrix{Int}(undef, (n, m))
+    current_max = Matrix{Int}(undef, (n, m))
 
     for i in 1:n
         for j in 1:m
             if i == 1
-                running_max[i,j] = mat[i,j]
+                current_max[i, j] = mat[i, j]
             else
-                running_max[i,j] = max(running_max[i-1,j], mat[i,j])
+                current_max[i, j] = max(current_max[i-1, j], mat[i, j])
             end
         end
     end
 
-    return running_max
+    return current_max
 end
-println(get_running_max(f_mat))
+
+function visible(mat)
+    (n, m) = size(mat)
+    vis = falses(n, m)
+    max_mat = current_max(mat)
+
+    for i in 1:n
+        for j in 1:m
+            if i ==1
+                vis[i, j] = true
+            elseif mat[i, j] > max_mat[i-1, j]
+                vis[i, j] = true
+            end
+        end
+    end
+
+    return(vis)
+end
+
+top_vis = visible(f_mat)
+bottom_vis = reverse(visible(reverse(f_mat, dims = 1)), dims = 1)
+right_vis = reverse(visible(reverse(f_mat', dims = 1)), dims = 1)'
+left_vis = reverse(visible(reverse(f_mat', dims = 2)), dims = 2)'
+
+total_vis = top_vis .|| bottom_vis .|| right_vis .|| left_vis
+println("Part 1: ", sum(total_vis))
+
+
+function scenic_score(mat)
+
+end
