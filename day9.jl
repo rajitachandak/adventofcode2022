@@ -27,118 +27,90 @@ function string_path(f::Vector{String}, grid::Matrix{Int})
     n = trunc(Int, size(grid)[1]/2)
     curr_H = [n, n]
     curr_T = [n, n]
-    grid[n, n] = 1
+#    grid[n, n] = 1
     # loop through all moves
-    for i in 1:12
-        l = split(f[i])
+    for i in 1:3
+        l = split(f[i], " ")
         if l[1] == "U"
             println(l)
-            steps = parse(Int, l[2])
             diff = curr_H .- curr_T
             println(diff)
-            curr_H = curr_H + [0, steps]
-            grid[curr_T[1]+diff[1], curr_T[2]+1] = 1
-            grid[curr_T[1]+diff[1], curr_T[2]+1:(curr_T[2] + steps - 1)] .= 1
-            curr_T = curr_T + [diff[1], diff[2] + steps-1]
-            println(curr_H)
-            println(curr_T)
-
-#            if pos_diff[1] != 0
-#                curr_T = curr_T + [pos_diff[1], steps]
-#                grid[curr_T[1]+pos_diff[1], curr_T[2]+1] = 1
-#                grid[curr_T[1]+1, curr_T[2]+1:(curr_T[2] + steps - 2)] .= 1
-#            elseif pos_diff[2] !=0
-#            end
-
-#            if curr_H + [0, 1] == curr_T
-#                steps = parse(Int, l[2]) - 2
-#                curr_H = curr_H .+ [0, steps+2]
-#                grid[curr_T[1], curr_T[2]:(curr_T[2] + steps)] .= 1
-#                curr_T = curr_T .+ [0, steps]
-#            elseif curr_T + [1, 1] == curr_H
-#                steps = parse(Int, l[2]) - 1
-#                curr_H = curr_H .+ [0, steps+1]
-#                grid[curr_T[1]+1, curr_T[2]+1] = 1
-#                grid[curr_T[1]+1, curr_T[2]:(curr_T[2] + steps-1)] .= 1
-#                curr_T = curr_T .+ [1, steps+1]
-#            elseif  curr_T + [-1, 1] == curr_H
-#                steps = parse(Int, l[2]) - 1
-#                curr_H = curr_H .+ [0, steps+1]
-#                grid[curr_T[1]-1, curr_T[2]+1] = 1
-#                grid[curr_T[1]-1, curr_T[2]:(curr_T[2] + steps-1)] .= 1
-#                curr_T = curr_T .+ [-1, steps+1]
-#            elseif curr_H + [1, 0] == curr_T
-#                steps = parse(Int, l[2]) - 1
-#                curr_H = curr_H .+ [0, steps+1]
-#                grid[curr_T[1]-1, curr_T[2]+1] = 1
-#                grid[curr_T[1]-1, curr_T[2]+1:(curr_T[2] + steps)] .= 1
-#                curr_T = curr_T .+ [-1, steps]
-#            else
-#                steps = parse(Int, l[2]) - 1
-#                curr_H = curr_H .+ [0, steps+1]
-#                grid[curr_T[1], curr_T[2]:(curr_T[2] + steps)] .= 1
-#                curr_T = curr_T .+ [0, steps]
-#            end
-#        elseif l[1] == "R"
-#            pos_diff = curr_H .- curr_T
-#            println(pos_diff)
-#            if curr_H + [1, 0] == curr_T
-#                steps = parse(Int, l[2]) - 2
-#                curr_H = curr_H .+ [steps+2, 0]
-#                grid[curr_T[1]:(curr_T[1] + steps), curr_T[2]] .= 1
-#                curr_T = curr_T .+ [steps, 0]
-#            elseif curr_H + [1, 1] == curr_T
-#                #TODO HERE
-#                steps = parse(Int, l[2]) - 2
-#                curr_H = curr_H .+ [0, steps+2]
-#                grid[curr_T[1], curr_T[2]:(curr_T[2] + steps)] .= 1
-#                curr_T = curr_T .+ [0, steps]
-#            else
-#                steps = parse(Int, l[2]) - 1
-#                curr_H = curr_H .+ [steps+1, 0]
-#                grid[curr_T[1]:(curr_T[1] + steps), curr_T[2]] .= 1
-#                curr_T = curr_T .+ [steps, 0]
-#            end
-#        elseif l[1] == "L"
-#            pos_diff = curr_H .- curr_T
-#            println(pos_diff)
-#            if curr_H - [0, 1] == curr_T
-#                steps = parse(Int, l[2]) - 2
-#                curr_H = curr_H .- [steps+2, 0]
-#                curr_T = curr_T .- [steps, 0]
-#                grid[curr_T[1]:(curr_T[1] + steps), curr_T[2]] .= 1
-#            elseif curr_H - [1, 1] == curr_T
-#                #TODO HERE
-#                steps = parse(Int, l[2]) - 2
-#                curr_H = curr_H .+ [0, steps+2]
-#                grid[curr_T[1], curr_T[2]:(curr_T[2] + steps)] .= 1
-#                curr_T = curr_T .+ [0, steps]
-#            else
-#                steps = parse(Int, l[2]) - 1
-#                curr_H = curr_H .- [steps+1, 0]
-#                curr_T = curr_T .- [steps, 0]
-#                grid[curr_T[1]:(curr_T[1] + steps), curr_T[2]] .= 1
-#            end
-#        elseif l[1] == "D"
-#            pos_diff = curr_H .- curr_T
-#            println(pos_diff)
-#            if curr_H - [0, 1] == curr_T
-#                steps = parse(Int, l[2]) - 2
-#                curr_H = curr_H .- [0, steps+2]
-#                curr_T = curr_T .- [0, steps]
-#                grid[curr_T[1], curr_T[2]:(curr_T[2] + steps)] .= 1
-#            elseif curr_H - [1, 1] == curr_T || curr_H - [1, 1] == curr_T
-#                #TODO HERE
-#                steps = parse(Int, l[2]) - 2
-#                curr_H = curr_H .+ [0, steps+2]
-#                grid[curr_T[1], curr_T[2]:(curr_T[2] + steps)] .= 1
-#                curr_T = curr_T .+ [0, steps]
-#            else
-#                steps = parse(Int, l[2]) - 1
-#                curr_H = curr_H .- [0, steps+1]
-#                curr_T = curr_T .- [0, steps]
-#                grid[curr_T[1], curr_T[2]:(curr_T[2] + steps)] .= 1
-#            end
+            steps = parse(Int, l[2])
+            if diff[2] == -1
+                curr_H = curr_H + [0, steps]
+                grid[curr_T[1]+diff[1], curr_T[2]+1] = 1
+                grid[curr_T[1]+diff[1], curr_T[2]+1:(curr_T[2] + steps + 1)] .= 1
+                curr_T = curr_T + [diff[1], diff[2] + steps+1]
+                println(curr_H)
+                println(curr_T)
+            else
+                curr_H = curr_H + [0, steps]
+                grid[curr_T[1]+diff[1], curr_T[2]+1] = 1
+                grid[curr_T[1]+diff[1], curr_T[2]+1:(curr_T[2] + steps - 1)] .= 1
+                curr_T = curr_T + [diff[1], diff[2] + steps-1]
+                println(curr_H)
+                println(curr_T)
+            end
+        elseif l[1] == "R"
+            println(l)
+            diff = curr_H .- curr_T
+            println(diff)
+            steps = parse(Int, l[2])
+            if diff[1] == -1
+                curr_H = curr_H + [steps, 0]
+                grid[curr_T[1], curr_T[2]+diff[2]] = 1
+                grid[curr_T[1]:(curr_T[1] + steps + 1), curr_T[2]+diff[2]] .= 1
+                curr_T = curr_T + [diff[1]+steps+1, diff[2]]
+                println(curr_H)
+                println(curr_T)
+            else
+                curr_H = curr_H + [steps, 0]
+                grid[curr_T[1], curr_T[2]+diff[2]] = 1
+                grid[curr_T[1]:(curr_T[1] + steps - 1), curr_T[2]+diff[2]] .= 1
+                curr_T = curr_T + [diff[1]+steps-1, diff[2]]
+                println(curr_H)
+                println(curr_T)
+            end
+        elseif l[1] == "L"
+            println(l)
+            diff = curr_H .- curr_T
+            println(diff)
+            steps = -parse(Int, l[2])
+            if diff[1] == 1
+                curr_H = curr_H + [steps, 0]
+                grid[curr_T[1], curr_T[2]+diff[2]] = 1
+                grid[curr_T[1]:(curr_T[1] + steps + 1), curr_T[2]+diff[2]] .= 1
+                curr_T = curr_T + [diff[1]+steps+1, diff[2]]
+                println(curr_H)
+                println(curr_T)
+            else
+                curr_H = curr_H + [steps, 0]
+                grid[curr_T[1], curr_T[2]+diff[2]] = 1
+                grid[curr_T[1]:(curr_T[1] + steps - 1), curr_T[2]+diff[2]] .= 1
+                curr_T = curr_T + [diff[1]+steps-1, diff[2]]
+                println(curr_H)
+                println(curr_T)
+            end
+        elseif l[1] == "D"
+            println(l)
+            steps = -parse(Int, l[2])
+            diff = curr_H .- curr_T
+            println(diff)
+            if diff[2] == 1
+                curr_H = curr_H + [0, steps]
+                grid[curr_T[1]+diff[1], curr_T[2]+1] = 1
+                grid[curr_T[1]+diff[1], curr_T[2]+1:(curr_T[2] + steps + 1)] .= 1
+                curr_T = curr_T + [diff[1], diff[2] + steps+1]
+                println(curr_H)
+                println(curr_T)
+            else
+                curr_H = curr_H + [0, steps]
+                grid[curr_T[1]+diff[1], curr_T[2]+1] = 1
+                grid[curr_T[1]+diff[1], curr_T[2]+1:(curr_T[2] + steps - 1)] .= 1
+                curr_T = curr_T + [diff[1], diff[2] + steps-1]
+                println(curr_H)
+                println(curr_T)
+            end
         end
     end
     return(grid)
