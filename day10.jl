@@ -15,44 +15,29 @@ function cycle_update(f)
     return(X)
 end
 cycles = [20, 60, 100, 140, 180, 220]
-println("Part 1: ", sum(cycles .* cycle_update(f)[cycles]))
+X = cycle_update(f)
+println("Part 1: ", sum(cycles .* X[cycles]))
+
 
 #Part 2
 
-function draw_CRT(f)
-    CRT = Matrix{String}(undef, (6, 40))
-    fill!(CRT, ".")
-    n = length(f)
-    X = [1]
-    row = 1
+function draw_CRT(X::Vector{Int})
+    CRT = Matrix{Int}(undef, (6, 40))
+    n = length(X)
+    row = 0
     for i in 1:n
-        col = mod(i, 40)
-        if mod(i, 40) == 0
-            col = 40
+        col = mod(i-1, 40)+1
+        if col == 1
+            row +=1
         end
-        if startswith(f[i], "noop")
-            if col in [X[end], X[end]+1, X[end]+2]
-                CRT[row, col] = "#"
-            end
-            push!(X, X[end])
-        else
-            if col in [X[end], X[end]+1, X[end]+2]
-                CRT[row, col] = "#"
-            end
-            push!(X, X[end])
-            if col in [X[end], X[end]+1, X[end]+2]
-                CRT[row, col] = "#"
-            end
-            ncycles = parse(Int, split(f[i], " ")[2])
-            push!(X, X[end]+ncycles)
-            if col in [X[end], X[end]+1, X[end]+2]
-                CRT[row, col] = "#"
-            end
+        if col in [X[i], X[i]+1, X[i]+2]
+            CRT[row, col] = 1
         end
     end
     return(CRT)
 end
 
-CRT = draw_CRT(f)
+CRT = draw_CRT(X)
+println("Part 2:")
 display(CRT)
 println()
