@@ -1,160 +1,85 @@
 f = readlines("day9.txt")
-function gen_grid(f::Vector{String})
-    n_u = 1
-    n_d = 1
-    n_r = 1
-    n_l = 1
-    for i in 1:length(f)
-        l = split(f[i])
-        if l[1] == "U"
-            n_u += parse(Int,l[2])
-        elseif l[1] == "R"
-            n_r += parse(Int, l[2])
-        elseif l[1] == "L"
-            n_l += parse(Int, l[2])
-        elseif l[1] == "D"
-            n_d += parse(Int, l[2])
-        end
+
+function head_update(head::Vector, direction::SubString{String})
+    if direction == "U"
+        head = head + [0, 1]
+    elseif direction == "D"
+        head = head + [0, -1]
+    elseif direction == "R"
+        head = head + [1, 0]
+    else
+        head = head + [-1, 0]
     end
-    n = max(n_u, n_d, n_r, n_l)
-    grid = round.(Int, zeros(2*n,2*n))
 
-    return(grid)
+    return(head)
 end
 
-function get_distance(diff::Vector)
-    abs_diff = broadcast(abs, diff)
-    dis = sum(abs_diff)
-    return(dis)
+function move_rope(head::Vector, tail::Vector)
+    x_dis = head[1] - tail[1]
+    y_dis = head[2] - tail[2]
+    if abs(x_dis)>1 || abs(y_dis)>1
+        tail = [tail[1] + sign(x_dis), tail[2]+sign(y_dis)]
+    end
+
+    return(head, tail)
 end
 
-function move_string(diff::Vector, steps::Int, direction::String)
-end
-
-function string_path(f::Vector{String}, grid::Matrix{Int})
-    #starting position
-    n = trunc(Int, size(grid)[1]/2)
-    curr_H = [n, n]
-    curr_T = [n, n]
-    grid[n, n] = 1
-    # loop through all moves
-    for i in 1:length(f)
+function rope_path(f::Vector{String})
+    n =  length(f)
+    visited = [[0,0]]
+    curr_T = [0, 0]
+    curr_H = [0, 0]
+    for i in 1:n
         l = split(f[i], " ")
-#        println(l)
         direction = l[1]
         steps = parse(Int, l[2])
-        diff = curr_H - curr_T
-        dis = get_distance(diff)
-        if dis < 2
-            if direction == "U"
-                curr_H = curr_H + [0, steps]
-                if diff == [0, 1] || diff == [0, 0]
-                    grid[curr_T[1], curr_T[2]:(curr_T[2]+steps-1+diff[2])].=1
-                    curr_T = curr_T + [0, steps-1+diff[2]]
-                elseif diff == [0, -1]
-                    grid[curr_T[1], curr_T[2]:(curr_T[2]+steps-2)].=1
-                    curr_T = curr_T + [0, steps-2]
-                else
-                    grid[curr_T[1]+diff[1], curr_T[2]+1:(curr_T[2]+1+steps-2)].=1
-                    curr_T = curr_T + diff + [0, 1] + [0, steps-2]
-                end
-            elseif direction == "D"
-                curr_H = curr_H + [0, -steps]
-                if diff == [0, -1] || diff == [0, 0]
-                    curr_T = curr_T - [0, steps+1+diff[2]]
-                    grid[curr_T[1], curr_T[2]:(curr_T[2]+steps)].=1
-                elseif diff == [0, 1]
-                    curr_T = curr_T - [0, steps-2]
-                    grid[curr_T[1], curr_T[2]:(curr_T[2]+steps-2)].=1
-                else
-                    grid[curr_T[1]+diff[1], curr_T[2]+1:(curr_T[2]+1+steps-2)].=1
-                    curr_T = curr_T + diff - [0, 1] + [0, steps-2]
-                end
-            elseif direction == "R"
-                curr_H = curr_H + [steps, 0]
-                if diff == [1, 0] || diff == [0, 0]
-                    grid[curr_T[1]:(curr_T[1]+steps-1+diff[1]), curr_T[2]].=1
-                    curr_T = curr_T + [steps-1+diff[1], 0]
-                elseif diff == [-1, 0]
-                    grid[curr_T[1]:(curr_T[1]+steps-2), curr_T[2]].=1
-                    curr_T = curr_T + [steps-2, 0]
-                else
-                    grid[curr_T[1]+1:(curr_T[1]+1+steps-2), curr_T[2]+diff[2]].=1
-                    curr_T = curr_T + diff + [1, 0] + [steps-2, 0]
-                end
-            else
-                curr_H = curr_H + [-steps, 0]
-                if diff == [-1, 0] || diff == [0, 0]
-                    curr_T = curr_T - [steps+1+diff[1], 0]
-                    grid[curr_T[1]:(curr_T[1]+steps), curr_T[2]].=1
-                elseif diff == [1, 0]
-                    curr_T = curr_T - [steps-2, 0]
-                    grid[curr_T[1]:(curr_T[1]+steps-2), curr_T[2]].=1
-                else
-                    grid[curr_T[1]+1:(curr_T[1]+1+steps-2), curr_T[2]+diff[2]].=1
-                    curr_T = curr_T + diff - [1, 0] + [steps-2, 0]
-                end
-            end
-
-        else
-            if direction == "U"
-                curr_H = curr_H + [0, steps]
-                if diff[2] == -1
-                    if steps > 2
-                        grid[curr_T[1]+diff[1], curr_T[2]+1:(curr_T[2]+steps-2)]
-                        curr_T = curr_T + [diff[1], steps-2]
-                    end
-                else
-                    grid[curr_T[1]+diff[1], curr_T[2]+1:(curr_T[2]+steps)]
-                    curr_T = curr_T + [diff[1], steps]
-                end
-            elseif direction == "D"
-                curr_H = curr_H + [0, -steps]
-                if diff[2] == -1
-                    grid[curr_T[1]+diff[1], curr_T[2]-steps:curr_T[2]-1]
-                    curr_T = curr_T + [diff[1], -steps]
-                else
-                    if steps > 2
-                        grid[curr_T[1]+diff[1], curr_T[2]+1:(curr_T[2]+steps-3)]
-                        curr_T = curr_T + [diff[1], -(steps-2)]
-                    else
-                        curr_T = curr_T
-                    end
-                end
-            elseif direction == "R"
-                curr_H = curr_H + [steps, 0]
-                    if diff[1] == -1
-                        if steps > 2
-                            grid[curr_T[1]+1:(curr_T[1]+steps-2), curr_T[2]+diff[2]]
-                            curr_T = curr_T + [steps-2, diff[2]]
-                        end
-                    else
-                        grid[curr_T[1]+1:(curr_T[1]+steps), curr_T[2]+diff[2]]
-                        curr_T = curr_T + [steps, diff[2]]
-                    end
-            else
-                curr_H = curr_H + [-steps, 0]
-                if diff[2] == -1
-                    grid[curr_T[1]-steps:curr_T[1]-1, curr_T[2]+diff[2]]
-                    curr_T = curr_T + [-steps, diff[2]]
-                else
-                    if steps > 2
-                        grid[curr_T[1]+1:(curr_T[1]+steps-3), curr_T[2]+diff[2]]
-                        curr_T = curr_T + [-(steps-2), diff[2]]
-                    end
-                end
-            end
+        for j in 1:steps
+            curr_H = head_update(curr_H, direction)
+            curr_H, curr_T = move_rope(curr_H, curr_T)
+            push!(visited, curr_T)
         end
-#        println(curr_H)
-#        println(curr_T)
-#        println(sum(grid[grid .== 1]))
     end
-    return(grid)
+
+    return (length(unique(visited)))
+end
+visited = rope_path(f)
+println("Part 1: ", visited)
+
+#Part 2
+function long_rope_path(f::Vector{String})
+    n =  length(f)
+    visited = [[0,0]]
+    head = [0, 0]
+    knot1 = [0, 0]
+    knot2 = [0, 0]
+    knot3 = [0, 0]
+    knot4 = [0, 0]
+    knot5 = [0, 0]
+    knot6 = [0, 0]
+    knot7 = [0, 0]
+    knot8 = [0, 0]
+    tail = [0, 0]
+    for i in 1:n
+        l = split(f[i], " ")
+        direction = l[1]
+        steps = parse(Int, l[2])
+        for j in 1:steps
+            head = head_update(head, direction)
+            head, knot1 = move_rope(head, knot1)
+            knot1, knot2 = move_rope(knot1, knot2)
+            knot2, knot3 = move_rope(knot2, knot3)
+            knot3, knot4 = move_rope(knot3, knot4)
+            knot4, knot5 = move_rope(knot4, knot5)
+            knot5, knot6 = move_rope(knot5, knot6)
+            knot6, knot7 = move_rope(knot6, knot7)
+            knot7, knot8 = move_rope(knot7, knot8)
+            knot8, tail = move_rope(knot8, tail)
+            push!(visited, tail)
+        end
+    end
+
+    return (length(unique(visited)))
 end
 
-
-grid = gen_grid(f)
-visited = string_path(f, grid)
-println(sum(visited[visited .== 1]))
-
-# 5532 too low
+long_visits = long_rope_path(f)
+println("Part 2: ", long_visits)
