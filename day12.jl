@@ -1,9 +1,8 @@
 f = readlines("day12.txt")
 
 function create_matrix(f::Vector{String})
-
     alphabet = collect('a':'z')
-    points = collect(1:26)
+    points = collect(26:-1:1)
     mydict = Dict(alphabet .=> points)
 
     n = length(f)
@@ -13,9 +12,9 @@ function create_matrix(f::Vector{String})
     for i in 1:n
         for j in 1:m
             if f[i][j] == 'S'
-                f_mat[i, j] = 0
-            elseif f[i][j] == 'E'
                 f_mat[i, j] = 27
+            elseif f[i][j] == 'E'
+                f_mat[i, j] = 0
             else
                 f_mat[i, j] = mydict[f[i][j]]
             end
@@ -25,51 +24,41 @@ function create_matrix(f::Vector{String})
 end
 
 mat = create_matrix(f)
-#display(mat)
-#println()
 
-function next_step(curr_row::Int, curr_col::Int, M::Matrix)
-    curr_val = M[curr_row, curr_col]
+function update_dis!(curr_min, M::Matrix)
+    min_val = curr_min[1]
+    min_row = curr_min[2][1]
+    min_col = curr_min[2][1]
 
-    next_step = []
-    if curr_row>1 && curr_col>1
-        if abs(M[curr_row-1, curr_col] - curr_val)<= 1
-            push!(next_step, [curr_row-1, curr_col])
-        end
-        if abs(M[curr_row+1, curr_col] - curr_val) <=1
-            push!(next_step, [curr_row+1, curr_col])
-        end
-        if abs(M[curr_row, curr_col+1] - curr_val) <=1
-            push!(next_step, [curr_row, curr_col+1])
-        end
-        if abs(M[curr_row, curr_col-1] - curr_val) <=1
-            push!(next_step, [curr_row, curr_col-1])
-        end
-    else
-        if abs(M[curr_row+1, curr_col] - curr_val) <=1
-            push!(next_step, [curr_row+1, curr_col])
-        end
-        if abs(M[curr_row, curr_col+1] - curr_val) <=1
-            push!(next_step, [curr_row, curr_col+1])
-        end
+    if abs(M[curr_row-1, curr_col] - curr_val)<= 1
     end
-    return(next_step)
+    if abs(M[curr_row+1, curr_col] - curr_val) <=1
+    end
+    if abs(M[curr_row, curr_col+1] - curr_val) <=1
+    end
+    if abs(M[curr_row, curr_col-1] - curr_val) <=1
+    end
 end
-println(next_step(2, 2, mat))
 
-function map_path(M::Matrix{Int}, s::Int, e::Int)
+function map_dis(M::Matrix{Int}, s::Int, e::Int)
     (n, m) = size(M)
 
-    end_point = findall(x->x==e, M)
-    end_col = end_point[1][2]
-    end_row = end_point[1][1]
-
-    start_point = findall(x->x==s, M)
-    start_col = start_point[1][2]
-    start_row = start_point[1][1]
-
     steps = 0
+    dis = zeros(n, m)
+    for i in 1:n
+        for j in 1:m
+            if M[i, j] == 0
+                dis[i, j] = 0
+            else
+                dis[i, j] = Inf
+            end
+        end
+    end
 
+    min_v = findmin(dis)
+    dis = update_dis!(min_v, dis)
+
+    return()
 end
 
-println(map_path(mat, 0, 27))
+println(map_dis(mat, 0, 27))
