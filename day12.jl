@@ -25,25 +25,36 @@ end
 
 mat = create_matrix(f)
 
-function update_dis!(curr_min, M::Matrix)
-    min_val = curr_min[1]
-    min_row = curr_min[2][1]
-    min_col = curr_min[2][1]
+function update_dis!(curr_min, dis::Matrix, v_set::Vector)
+    M = create_matrix(f)
+    curr_val = curr_min[1]
+    curr_row = curr_min[2][1]
+    curr_col = curr_min[2][2]
 
-    if abs(M[curr_row-1, curr_col] - curr_val)<= 1
+    if (M[curr_row-1, curr_col] - curr_val) == 1
+        dis[curr_row-1, curr_col] = curr_val + 1
+        push!(v_set, [curr_row-1, curr_col])
     end
-    if abs(M[curr_row+1, curr_col] - curr_val) <=1
+    if (M[curr_row+1, curr_col] - curr_val) ==1
+        dis[curr_row+1, curr_col] = curr_val + 1
+        push!(v_set, [curr_row+1, curr_col])
     end
-    if abs(M[curr_row, curr_col+1] - curr_val) <=1
+    if (M[curr_row, curr_col+1] - curr_val) ==1
+        dis[curr_row, curr_col+1] = curr_val + 1
+        push!(v_set, [curr_row, curr_col+1])
     end
-    if abs(M[curr_row, curr_col-1] - curr_val) <=1
+    if (M[curr_row, curr_col-1] - curr_val) ==1
+        dis[curr_row, curr_col-1] = curr_val + 1
+        push!(v_set, [curr_row, curr_col-1])
     end
+    return(dis, v_set)
 end
 
 function map_dis(M::Matrix{Int}, s::Int, e::Int)
     (n, m) = size(M)
 
     steps = 0
+    v_set = []
     dis = zeros(n, m)
     for i in 1:n
         for j in 1:m
@@ -56,9 +67,11 @@ function map_dis(M::Matrix{Int}, s::Int, e::Int)
     end
 
     min_v = findmin(dis)
-    dis = update_dis!(min_v, dis)
+    push!(v_set, [min_v[2][1], min_v[2][2]])
 
-    return()
+    dis = update_dis!(min_v, dis, v_set)
+
+    return(dis)
 end
 
 println(map_dis(mat, 0, 27))
