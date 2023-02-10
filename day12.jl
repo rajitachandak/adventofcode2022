@@ -37,6 +37,7 @@ function get_neighbours(curr_min, n, m)
     if i < n
         push!(neighbours, [i+1, j])
     end
+
     if j > 1
         push!(neighbours, [i, j-1])
     end
@@ -44,6 +45,7 @@ function get_neighbours(curr_min, n, m)
     if j < m
         push!(neighbours, [i, j+1])
     end
+
     return(neighbours)
 end
 
@@ -66,34 +68,6 @@ function dijkstra(M::Matrix{Int})
     visited = fill(false, (n, m))
     unvisited = fill(true, (n, m))
 
-    while any(unvisited)
-        curr_min = []
-        for i in 1:n
-            for j in 1:m
-                if unvisited[i, j]
-                    if isempty(curr_min)
-                        curr_min = [i, j]
-                    elseif dis[i, j] < dis[curr_min[1], curr_min[2]]
-                        curr_min = [i, j]
-                    end
-                end
-            end
-        end
-
-        neighbours = get_neighbours(curr_min, n, m)
-        for (i,j) in neighbours
-            if M[curr_min[1], curr_min[2]] -  M[i, j] == 0
-                temp_val = dis[curr_min[1], curr_min[2]] + (M[curr_min[1], curr_min[2]] -  M[i, j] + 1)
-            else
-                temp_val = dis[curr_min[1], curr_min[2]] + (M[curr_min[1], curr_min[2]] -  M[i, j])
-            end
-            if temp_val < dis[i, j]
-                dis[i, j] = temp_val
-            end
-        end
-        visited[curr_min[1], curr_min[2]] = true
-        unvisited[curr_min[1], curr_min[2]] = false
-    end
     return(dis)
 end
 
@@ -105,4 +79,3 @@ dis = dijkstra(mat)
 println(dis)
 s = findall(a->a ==0, mat)[1]
 println(s)
-println("Part 1:", min_distance(dis,s))
