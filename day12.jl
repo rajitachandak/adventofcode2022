@@ -49,33 +49,47 @@ function get_neighbours(curr_min, n, m)
     return(neighbours)
 end
 
-function dijkstra(M::Matrix{Int})
+function dijkstra(M::Matrix{Int}, end_node)
     (n, m) = size(M)
 
     dis = zeros(n, m)
-    curr_min = []
+    curr_node = []
     for i in 1:n
         for j in 1:m
-            if M[i, j] == 27
+            if M[i, j] == 0
                 dis[i, j] = 0
-                curr_min = [i, j]
+                curr_node = (i, j)
             else
                 dis[i, j] = Inf
             end
         end
     end
 
-    visited = fill(false, (n, m))
-    unvisited = fill(true, (n, m))
+    visited = []
+    unvisited = Tuple.(findall(a-> isa(a, Number), dis))
+
+    while dis[end_node] == Inf
+        neighbours = get_neighbours(curr_node, n, m)
+        for node in neighbours
+            i = node[1]
+            j = node[2]
+            if abs(M[i, j] - M[curr_node...])<=1
+                min_dis = min(dis[i, j], dis[curr_node[1], curr_node[2]]+1)
+                dis[i, j] = min_dis
+            end
+        end
+        push!(visited, curr_node)
+        deleteat!(unvisited, findall(x->x ==curr_node, unvisited))
+        curr_node = unvisited[findmin([dis[i...] for i in unvisited])[2]]
+    end
 
     return(dis)
 end
 
-function min_distance(dis::Matrix, point::CartesianIndex{2})
-    return(dis[point[1], point[2]])
-end
 
-dis = dijkstra(mat)
-println(dis)
-s = findall(a->a ==0, mat)[1]
+#display(mat)
+s = findall(a->a ==27, mat)[1]
+dis = dijkstra(mat, s)
+#println(dis)
 println(s)
+dis[s]
