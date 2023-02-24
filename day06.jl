@@ -1,4 +1,4 @@
-f = readlines("day6.txt")[1]
+f = readlines("day06.txt")[1]
 
 function marker(s::String, d::Int)
     n = length(s) - d

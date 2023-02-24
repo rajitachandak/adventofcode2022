@@ -1,4 +1,4 @@
-f = readlines("day8.txt")
+f = readlines("day08.txt")
 n = length(f)
 m = length(f[1])
 

@@ -1,5 +1,5 @@
 #part 1
-f=readlines("day2.txt")
+f=readlines("day02.txt")
 
 results = Dict(
     "A X"=>1+3,

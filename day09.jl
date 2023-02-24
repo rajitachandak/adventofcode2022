@@ -1,4 +1,4 @@
-f = readlines("day9.txt")
+f = readlines("day09.txt")
 
 function head_update(head::Vector, direction::SubString{String})
     if direction == "U"

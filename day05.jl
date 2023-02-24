@@ -1,4 +1,4 @@
-f = readlines("day5.txt")
+f = readlines("day05.txt")
 boxes = Dict(
     1 => ['R', 'G', 'H', 'Q', 'S', 'B', 'T', 'N'],
     2 => ['H', 'S', 'F', 'D', 'P', 'Z', 'J'],

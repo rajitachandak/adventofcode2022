@@ -31,7 +31,7 @@ function overlaps(s, t)
     end
 end
 
-open("day4.txt") do f
+open("day04.txt") do f
     counter = 0
     overlap_counter = 0
     for l in eachline(f)

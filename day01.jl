@@ -1,5 +1,5 @@
 #part 1
-f=readlines("day1.txt")
+f=readlines("day01.txt")
 total = []
 let tot = 0
     for i in 1:length(f)

@@ -1,4 +1,4 @@
-f = readlines("day7.txt")
+f = readlines("day07.txt")
 
 dir_list =["/"]
 for l in f
