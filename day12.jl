@@ -73,7 +73,7 @@ function dijkstra(M::Matrix{Int}, end_node)
         for node in neighbours
             i = node[1]
             j = node[2]
-            if abs(M[i, j] - M[curr_node...])<=1
+            if M[i, j] <= M[curr_node...]+1
                 min_dis = min(dis[i, j], dis[curr_node[1], curr_node[2]]+1)
                 dis[i, j] = min_dis
             end
@@ -90,6 +90,4 @@ end
 #display(mat)
 s = findall(a->a ==27, mat)[1]
 dis = dijkstra(mat, s)
-#println(dis)
-println(s)
-dis[s]
+println("Part 1: ", dis[s])
