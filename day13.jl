@@ -1,9 +1,18 @@
 f = readlines("day13.txt")
-n=length(f)
 
-global i=1
-while i<n
-    println(f[i])
-    println(f[i+1])
-    global i+=3
+function getpairs(f::Vector{String})
+    pairs = []
+    n = length(f)
+    pair = []
+    for i in 1:n
+        if f[i] == ""
+            push!(pairs, pair)
+            pair = []
+        else
+            push!(pair, f[i])
+        end
+    end
+    return(pairs)
 end
+
+pairs = getpairs(f)
