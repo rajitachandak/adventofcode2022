@@ -15,4 +15,26 @@ function getpairs(f::Vector{String})
     return(pairs)
 end
 
+function compare_values(l::Int, r::Int)
+
+    if l < r
+        return true
+    else if l > r
+        return false
+    else
+        return NaN
+    end
+end
+
+function compare_values(l::Vector{String}, r::Vector{String})
+
+    if l[1] == "["
+        popfirst!(l)
+    else if l[1] == "]"
+    else
+        compare_values(parse(Int, l[1]), parse(Int, r[1]))
+    end
+
+end
+
 pairs = getpairs(f)
