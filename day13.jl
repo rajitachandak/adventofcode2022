@@ -19,7 +19,7 @@ function compare_values(l::Int, r::Int)
 
     if l < r
         return true
-    else if l > r
+    elseif l > r
         return false
     else
         return NaN
@@ -28,13 +28,30 @@ end
 
 function compare_values(l::Vector{String}, r::Vector{String})
 
-    if l[1] == "["
+    if l[1] == "[" && r[1] == "["
         popfirst!(l)
-    else if l[1] == "]"
+        popfirst!(r)
+        compare_values(l, r)
+    elseif l[1] == "["
+    elseif l[1] == "]" && r[1] != "]"
+        return true
+    elseif l[1] == "]" && r[1] == "]"
+        popfirst!(l)
+        popfirst!(r)
+        compare_values(l, r)
     else
-        compare_values(parse(Int, l[1]), parse(Int, r[1]))
+       return compare_values(parse(Int, l[1]), parse(Int, r[1]))
     end
 
+end
+
+function parse_pairs(pairs::Vector{String})
+    count = 0
+    n = length(pairs)
+    for i in 1:n
+        l = pairs[i][1]
+        r = pairs[i][2]
+    end
 end
 
 pairs = getpairs(f)
