@@ -124,3 +124,11 @@ for i in 1:length(pairs)
     end
 end
 println("Part 1: ", sum(correct))
+
+#Part 2
+new_f = [t for t in f if t !=""]
+push!(new_f, "[[2]]", "[[6]]")
+sorted_f = sort(new_f, lt=compare_values)
+ind1 = findfirst(sorted_f .== "[[2]]")
+ind2 = findfirst(sorted_f .== "[[6]]")
+println("Part 2: ", ind1*ind2)
