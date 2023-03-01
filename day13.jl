@@ -15,39 +15,9 @@ function getpairs(f::Vector{String})
     return(pairs)
 end
 
-function compare_values(l::Int, r::Int)
-
-    if l < r
-        return true
-    elseif l > r
-        return false
-    else
-        return NaN
-    end
-end
-
-function compare_values(l::Vector{String}, r::Vector{String})
-
-    if l[1] == "[" && r[1] == "["
-        popfirst!(l)
-        popfirst!(r)
-        compare_values(l, r)
-    elseif l[1] == "["
-    elseif l[1] == "]" && r[1] != "]"
-        return true
-    elseif l[1] == "]" && r[1] == "]"
-        popfirst!(l)
-        popfirst!(r)
-        compare_values(l, r)
-    else
-       return compare_values(parse(Int, l[1]), parse(Int, r[1]))
-    end
-
-end
-
 function parse_pair(s::String)
-    count = 0
-    n = length(s)
+    @assert s[1] == '['
+    @assert s[end] == ']'
     s = s[2:end-1]
 
     if length(s) == 0
@@ -77,4 +47,77 @@ function parse_pair(s::String)
     return(string)
 end
 
+function check_int(s::String)
+
+    if all(c in '0':'9' for c in s)
+        return true
+    else
+        return false
+    end
+
+end
+
+function compare_values(l::Int, r::Int)
+
+    if l < r
+        return true
+    elseif l > r
+        return false
+    else
+        return nothing
+    end
+
+end
+
+function compare_values(l::String, r::String)
+
+    if check_int(l) && check_int(r)
+        return compare_values(parse(Int, l), parse(Int, r))
+
+    elseif !check_int(l) && check_int(r)
+        return compare_values(parse_pair[l], [r])
+
+    elseif check_int(l) && !check_int(r)
+        return compare_values([l], parse_pair(r))
+
+    else
+        return compare_values(parse_pair(l), parse_pair(r))
+    end
+
+end
+
+function compare_values(l::Vector{String}, r::Vector{String})
+    min_len = min(length(l), length(r))
+
+    for i in 1:min_len
+        state = compare_values(l[i], r[i])
+        if state == true
+            return true
+        end
+        if state == false
+            return false
+        end
+    end
+
+    if length(l) < length(r)
+        return true
+    elseif length(l) > length(r)
+        return false
+    else
+        return nothing
+    end
+
+end
+
+
+#Part 1
 pairs = getpairs(f)
+correct = []
+for i in 1:length(pairs)
+    l = pairs[i][1]
+    r = pairs[i][2]
+    result = compare_values(l, r)
+    if result
+        push!(correct, i)
+    end
+end
