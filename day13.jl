@@ -1,4 +1,3 @@
-f = readlines("day13.txt")
 
 function getpairs(f::Vector{String})
     pairs = []
@@ -12,6 +11,7 @@ function getpairs(f::Vector{String})
             push!(pair, parse_pair(f[i]))
         end
     end
+    push!(pairs, pair)
     return(pairs)
 end
 
@@ -75,12 +75,12 @@ function compare_values(l::String, r::String)
         return compare_values(parse(Int, l), parse(Int, r))
 
     elseif !check_int(l) && check_int(r)
-        return compare_values(parse_pair[l], [r])
+        return compare_values(parse_pair(l), [r])
 
     elseif check_int(l) && !check_int(r)
         return compare_values([l], parse_pair(r))
 
-    else
+    elseif !check_int(l) && !check_int(r)
         return compare_values(parse_pair(l), parse_pair(r))
     end
 
@@ -110,6 +110,8 @@ function compare_values(l::Vector{String}, r::Vector{String})
 end
 
 
+f = readlines("day13.txt")
+
 #Part 1
 pairs = getpairs(f)
 correct = []
@@ -121,3 +123,4 @@ for i in 1:length(pairs)
         push!(correct, i)
     end
 end
+println("Part 1: ", sum(correct))
