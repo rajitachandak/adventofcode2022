@@ -9,7 +9,7 @@ function getpairs(f::Vector{String})
             push!(pairs, pair)
             pair = []
         else
-            push!(pair, f[i])
+            push!(pair, parse_pair(f[i]))
         end
     end
     return(pairs)
@@ -45,13 +45,36 @@ function compare_values(l::Vector{String}, r::Vector{String})
 
 end
 
-function parse_pairs(pairs::Vector{String})
+function parse_pair(s::String)
     count = 0
-    n = length(pairs)
-    for i in 1:n
-        l = pairs[i][1]
-        r = pairs[i][2]
+    n = length(s)
+    s = s[2:end-1]
+
+    if length(s) == 0
+        return String[]
     end
+
+    string = String[]
+    substr = ""
+    bracket_count = 0
+
+    for char in s
+        if char == '['
+            bracket_count += 1
+        end
+        if char == ']'
+            bracket_count -= 1
+        end
+        if bracket_count == 0 && char == ','
+            push!(string, substr)
+            substr = ""
+        else
+            substr = substr * char
+        end
+    end
+    push!(string, substr)
+
+    return(string)
 end
 
 pairs = getpairs(f)
