@@ -72,21 +72,18 @@ function falling_sand!(grid::Matrix{Char}, start::Tuple)
             grid[x_curr, y_curr] = '.'
             y_curr = y_curr + 1
             grid[x_curr, y_curr] = 's'
-            grid[x_start, y_start] = '+'
 
         elseif grid[x_curr - 1, y_curr + 1] == '.'
             grid[x_curr, y_curr] = '.'
             y_curr = y_curr + 1
             x_curr = x_curr - 1
             grid[x_curr, y_curr] = 's'
-            grid[x_start, y_start] = '+'
 
         elseif grid[x_curr + 1, y_curr + 1] == '.'
             grid[x_curr, y_curr] = '.'
             y_curr = y_curr + 1
             x_curr = x_curr + 1
             grid[x_curr, y_curr] = 's'
-            grid[x_start, y_start] = '+'
 
         else
             grid[x_curr, y_curr] = 'o'
@@ -95,7 +92,6 @@ function falling_sand!(grid::Matrix{Char}, start::Tuple)
                 return(grid)
             else
                 (x_curr, y_curr) = (x_start, y_start)
-                grid[x_start, y_start] = '+'
             end
 
         end
