@@ -71,19 +71,19 @@ function falling_sand!(grid::Matrix{Char}, start::Tuple)
         if grid[x_curr, y_curr + 1] == '.'
             grid[x_curr, y_curr] = '.'
             y_curr = y_curr + 1
-            grid[x_curr, y_curr] = 's'
+#            grid[x_curr, y_curr] = 's'
 
         elseif grid[x_curr - 1, y_curr + 1] == '.'
             grid[x_curr, y_curr] = '.'
             y_curr = y_curr + 1
             x_curr = x_curr - 1
-            grid[x_curr, y_curr] = 's'
+#            grid[x_curr, y_curr] = 's'
 
         elseif grid[x_curr + 1, y_curr + 1] == '.'
             grid[x_curr, y_curr] = '.'
             y_curr = y_curr + 1
             x_curr = x_curr + 1
-            grid[x_curr, y_curr] = 's'
+#            grid[x_curr, y_curr] = 's'
 
         else
             grid[x_curr, y_curr] = 'o'
@@ -100,6 +100,17 @@ function falling_sand!(grid::Matrix{Char}, start::Tuple)
 
 end
 
+function add_floor(g::Vector{Vector{Tuple}})
+    ymax = maximum([maximum(rock[2] for rock in l) for l in g])
+    ymin = minimum([minimum(rock[2] for rock in l) for l in g])
+    xmax = maximum([maximum(rock[1] for rock in l) for l in g])
+    xmin = minimum([minimum(rock[1] for rock in l) for l in g])
+
+    push!(g, [(xmin-500, ymax+2), (xmax+500, ymax+2)])
+
+
+    return(g)
+end
 
 f = readlines("day14.txt")
 
@@ -124,3 +135,25 @@ grid = build_rock(g, start)
 filled_grid = falling_sand!(grid, start)
 
 println("Part 1: ", sum(filled_grid.=='o'))
+
+
+#Part 2
+g = read_grid(f)
+g = add_floor(g)
+ymax = maximum([maximum(rock[2] for rock in l) for l in g])
+ymax = max(500, ymax)
+ymin = minimum([minimum(rock[2] for rock in l) for l in g])
+ymin = min(0, ymin)
+xmax = maximum([maximum(rock[1] for rock in l) for l in g])
+xmax = max(500, xmax)
+xmin = minimum([minimum(rock[1] for rock in l) for l in g])
+xmin = min(0, xmin)
+
+xdim = xmax - xmin + 3
+ydim = ymax - ymin + 3
+
+start = (500 - xmin+2, 0 - ymin+2)
+grid = build_rock(g, start)
+filled_grid = falling_sand!(grid, start)
+
+println("Part 2: ", sum(filled_grid.=='o'))
