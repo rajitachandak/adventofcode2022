@@ -17,6 +17,14 @@ end
 
 #expand all rock points
 function build_rock(g::Vector{Vector{Tuple}}, start::Tuple)
+    ymax = maximum([maximum(rock[2] for rock in l) for l in g])
+    ymax = max(500, ymax)
+    ymin = minimum([minimum(rock[2] for rock in l) for l in g])
+    ymin = min(0, ymin)
+    xmax = maximum([maximum(rock[1] for rock in l) for l in g])
+    xmax = max(500, xmax)
+    xmin = minimum([minimum(rock[1] for rock in l) for l in g])
+    xmin = min(0, xmin)
 
     grid = Array{Char}(undef, (xdim, ydim))
     grid .= '.'
@@ -28,14 +36,14 @@ function build_rock(g::Vector{Vector{Tuple}}, start::Tuple)
             rock2 = l[i+1]
 
             if rock1[1] == rock2[1]
-                x = rock1[1] - xmin + 1
-                y_start = min(rock1[2], rock2[2]) - ymin + 1
-                y_end = max(rock1[2], rock2[2]) - ymax + 1
+                x = rock1[1] - xmin + 2
+                y_start = min(rock1[2], rock2[2]) - ymin + 2
+                y_end = max(rock1[2], rock2[2]) - ymin + 2
                 grid[x, y_start:y_end] .= '#'
             elseif rock1[2] == rock2[2]
-                y = rock1[2] - ymin + 1
-                x_start = min(rock1[1], rock2[1]) - xmin + 1
-                x_end = max(rock1[1], rock2[1]) - xmax + 1
+                y = rock1[2] - ymin + 2
+                x_start = min(rock1[1], rock2[1]) - xmin + 2
+                x_end = max(rock1[1], rock2[1]) - xmin + 2
                 grid[x_start:x_end, y] .= '#'
             end
         end
@@ -45,8 +53,55 @@ function build_rock(g::Vector{Vector{Tuple}}, start::Tuple)
 end
 
 # track sand location
-function falling_sand(grid::Matrix{Char}, start::Tuple)
-    #use findmin?
+function falling_sand!(grid::Matrix{Char}, start::Tuple)
+    status = false
+
+    x_start = start[1]
+    y_start = start[2]
+    x_curr = x_start
+    y_curr = y_start
+
+    while !status
+
+        if y_curr == size(grid)[2]
+            status = true
+            return(grid)
+        end
+
+        if grid[x_curr, y_curr + 1] == '.'
+            grid[x_curr, y_curr] = '.'
+            y_curr = y_curr + 1
+            grid[x_curr, y_curr] = 's'
+            grid[x_start, y_start] = '+'
+
+        elseif grid[x_curr - 1, y_curr + 1] == '.'
+            grid[x_curr, y_curr] = '.'
+            y_curr = y_curr + 1
+            x_curr = x_curr - 1
+            grid[x_curr, y_curr] = 's'
+            grid[x_start, y_start] = '+'
+
+        elseif grid[x_curr + 1, y_curr + 1] == '.'
+            grid[x_curr, y_curr] = '.'
+            y_curr = y_curr + 1
+            x_curr = x_curr + 1
+            grid[x_curr, y_curr] = 's'
+            grid[x_start, y_start] = '+'
+
+        else
+            grid[x_curr, y_curr] = 'o'
+            if (x_curr, y_curr) == (x_start, y_start)
+                status = true
+                return(grid)
+            else
+                (x_curr, y_curr) = (x_start, y_start)
+                grid[x_start, y_start] = '+'
+            end
+
+        end
+
+    end
+
 end
 
 
@@ -63,9 +118,13 @@ xmax = max(500, xmax)
 xmin = minimum([minimum(rock[1] for rock in l) for l in g])
 xmin = min(0, xmin)
 
-xdim = xmax - xmin + 2
-ydim = ymax - ymin + 2
+xdim = xmax - xmin + 3
+ydim = ymax - ymin + 3
 
-start = (500 - xmin+1, 0 - ymin+1)
+start = (500 - xmin+2, 0 - ymin+2)
 
 grid = build_rock(g, start)
+
+filled_grid = falling_sand!(grid, start)
+
+println("Part 1: ", sum(filled_grid.=='o'))
