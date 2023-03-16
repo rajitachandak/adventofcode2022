@@ -1,5 +1,6 @@
 using Distances
 f = readlines("day15.txt")
+t = readlines("test.txt")
 
 function locations(f::Vector{String})
     sensors = Tuple[]
@@ -18,10 +19,10 @@ function locations(f::Vector{String})
 
 end
 
-(sensors, beacons) = locations(f)
 
 function map_locations(sensors::Vector{Tuple}, beacons::Vector{Tuple})
     @assert (length(sensors) == length(beacons))
+    b2=2000000
 
     xmin = min(minimum(s[1] for s in sensors), minimum(b[1] for b in beacons))
     ymin = min(minimum(s[2] for s in sensors), minimum(b[2] for b in beacons))
@@ -29,23 +30,57 @@ function map_locations(sensors::Vector{Tuple}, beacons::Vector{Tuple})
     ymax = max(maximum(s[2] for s in sensors), maximum(b[2] for b in beacons))
 
     xrange = collect(xmin:xmax)
-    println(length(xrange))
 
     dis = cityblock.(sensors, beacons)
 
-    b1 = reverse_dir.(sensors, dis)
+    xlist = []
+    for i in 1:length(sensors)
+        s = sensors[i]
+        d = cityblock(s, [s[1], b2])
+        if d == dis[i]
+            push!(xlist, [s[1]])
+        elseif d < dis[i]
+            dstar = dis[i] - d
+            push!(xlist, [s[1]-dstar, s[1]+dstar])
+        end
+        #xlist = Int[]
+        #for j in xrange
+            #d = manhattan(sensors[i], j)
+            #if d <= dis[i]
+                #push!(xlist, j)
+            #end
+        #end
+        #println(length(xlist))
+        #xrange = setdiff(xrange, xlist)
+    end
+
+    println(xlist)
+    for l in xlist
+        if length(l) == 1
+            xrange = setdiff(xrange, l)
+        else
+            xrange = setdiff(xrange, collect(l[1]:l[2]))
+        end
+    end
+    println(xrange)
+    println(xmax-xmin-length(xrange))
+    return
 
 end
 
+#d
+#dstar = dis[i] - d
+#s[1]-dstar:s[1]+dstar
+#setdiff(xrange, newrange)
+
+function manhattan(s::Tuple{Int, Int}, b1::Int)
+
+    d = cityblock(s, [b1, b2])
+
+    return(d)
+
+end
+
+
+(sensors, beacons) = locations(f)
 map_locations(sensors, beacons)
-
-
-function reverse_dir(s::Tuple{Int, Int}, d::Int)
-    b2=2000000
-    (s1, s2) = s
-
-    b1= s1 + d - abs(s2-b2)
-
-    return(b1)
-
-end
