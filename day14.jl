@@ -26,6 +26,9 @@ function build_rock(g::Vector{Vector{Tuple}}, start::Tuple)
     xmin = minimum([minimum(rock[1] for rock in l) for l in g])
     xmin = min(0, xmin)
 
+    xdim = xmax - xmin + 3
+    ydim = ymax - ymin + 3
+
     grid = Array{Char}(undef, (xdim, ydim))
     grid .= '.'
     grid[start[1], start[2]] = '+'
@@ -124,9 +127,6 @@ xmax = maximum([maximum(rock[1] for rock in l) for l in g])
 xmax = max(500, xmax)
 xmin = minimum([minimum(rock[1] for rock in l) for l in g])
 xmin = min(0, xmin)
-
-xdim = xmax - xmin + 3
-ydim = ymax - ymin + 3
 
 start = (500 - xmin+2, 0 - ymin+2)
 
