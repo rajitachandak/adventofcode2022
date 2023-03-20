@@ -23,6 +23,7 @@ end
 function map_locations(sensors::Vector{Tuple}, beacons::Vector{Tuple})
     @assert (length(sensors) == length(beacons))
     b2=2000000
+    #b2=10
 
     xmin = min(minimum(s[1] for s in sensors), minimum(b[1] for b in beacons))
     ymin = min(minimum(s[2] for s in sensors), minimum(b[2] for b in beacons))
@@ -41,46 +42,22 @@ function map_locations(sensors::Vector{Tuple}, beacons::Vector{Tuple})
             push!(xlist, [s[1]])
         elseif d < dis[i]
             dstar = dis[i] - d
-            push!(xlist, [s[1]-dstar, s[1]+dstar])
-        end
-        #xlist = Int[]
-        #for j in xrange
-            #d = manhattan(sensors[i], j)
-            #if d <= dis[i]
-                #push!(xlist, j)
-            #end
-        #end
-        #println(length(xlist))
-        #xrange = setdiff(xrange, xlist)
-    end
-
-    println(xlist)
-    for l in xlist
-        if length(l) == 1
-            xrange = setdiff(xrange, l)
-        else
-            xrange = setdiff(xrange, collect(l[1]:l[2]))
+            push!(xlist, (s[1]-dstar):(s[1]+dstar))
         end
     end
-    println(xrange)
-    println(xmax-xmin-length(xrange))
-    return
+    return(xlist)
 
 end
 
-#d
-#dstar = dis[i] - d
-#s[1]-dstar:s[1]+dstar
-#setdiff(xrange, newrange)
+function covered_blocks(ranges::Vector)
+    covered = union(ranges[1])
+    for i in 2:length(ranges)
+        covered = union(covered, ranges[i])
+    end
 
-function manhattan(s::Tuple{Int, Int}, b1::Int)
-
-    d = cityblock(s, [b1, b2])
-
-    return(d)
-
+    return(maximum(covered) - minimum(covered))
 end
-
 
 (sensors, beacons) = locations(f)
-map_locations(sensors, beacons)
+ranges = map_locations(sensors, beacons)
+println("Part 1:", covered_blocks(ranges))
