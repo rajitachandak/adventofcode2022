@@ -121,18 +121,17 @@ function find_beacon(sensors::Vector{Tuple}, dis::Vector{Int}, lim::Int)
 end
 
 function tuning_frequency(point)
-    (x, y) = point
+    (x, y) = point[]
     return(4000000*x + y)
 end
 
 f = readlines("day15.txt")
-t = readlines("test.txt")
 
 #Part 1
 (sensors, beacons) = locations(f)
 b2=2000000
 ranges = map(sensors, beacons, b2)
-println("Part 1:", covered_blocks(ranges))
+println("Part 1: ", covered_blocks(ranges))
 
 
 #Part 2
