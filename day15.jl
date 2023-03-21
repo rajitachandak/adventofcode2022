@@ -1,6 +1,4 @@
 using Distances
-f = readlines("day15.txt")
-t = readlines("test.txt")
 
 function locations(f::Vector{String})
     sensors = Tuple[]
@@ -19,18 +17,8 @@ function locations(f::Vector{String})
 
 end
 
-
-function map_locations(sensors::Vector{Tuple}, beacons::Vector{Tuple})
+function map(sensors::Vector{Tuple}, beacons::Vector{Tuple}, b2::Int)
     @assert (length(sensors) == length(beacons))
-    b2=2000000
-    #b2=10
-
-    xmin = min(minimum(s[1] for s in sensors), minimum(b[1] for b in beacons))
-    ymin = min(minimum(s[2] for s in sensors), minimum(b[2] for b in beacons))
-    xmax = max(maximum(s[1] for s in sensors), maximum(b[1] for b in beacons))
-    ymax = max(maximum(s[2] for s in sensors), maximum(b[2] for b in beacons))
-
-    xrange = collect(xmin:xmax)
 
     dis = cityblock.(sensors, beacons)
 
@@ -58,6 +46,97 @@ function covered_blocks(ranges::Vector)
     return(maximum(covered) - minimum(covered))
 end
 
+function neighbours(sensor::Tuple, d::Int, lim::Int)
+    (s1, s2) = sensor
+    neighbours = []
+
+    if 0<=s2+d+1<=lim
+        push!(neighbours, (s1, s2+d+1))
+    end
+    if 0<=s2-d-1<=lim
+        push!(neighbours, (s1, s2-d-1))
+    end
+    if 0<=s1+d+1<=lim
+        push!(neighbours, (s1+d+1, s2))
+    end
+    if 0<=s1-d-1<=lim
+        push!(neighbours, (s1-d-1, s2))
+    end
+
+    for i in 1:d
+        if 0<=s1+i<=lim && 0<=s2+d+1-i<=lim
+            push!(neighbours, (s1+i, s2+d+1-i))
+        end
+        if 0<=s1-i<=lim && 0<=s2+d+1-i<=lim
+            push!(neighbours, (s1-i, s2+d+1-i))
+        end
+        if 0<=s1+i<=lim && 0<=s2-d-1+i<=lim
+            push!(neighbours, (s1+i, s2-d-1+i))
+        end
+        if 0<=s1-i<=lim && 0<=s2-d-1+i<=lim
+        push!(neighbours, (s1-i, s2-d-1+i))
+        end
+    end
+
+    return(neighbours)
+
+end
+
+function in_range(point::Tuple, sensor::Tuple, d::Int)
+
+    return(cityblock(point, sensor) <= d)
+
+end
+
+function all_neighbours(sensors::Vector{Tuple}, dis::Vector{Int}, lim::Int)
+    points = []
+
+    for i in 1:length(sensors)
+        s = sensors[i]
+        d = dis[i]
+        append!(points, neighbours(s, d, lim))
+    end
+
+    return(unique(points))
+end
+
+function find_beacon(sensors::Vector{Tuple}, dis::Vector{Int}, lim::Int)
+    points = all_neighbours(sensors, dis, lim)
+    uncovered = []
+
+    for p in points
+        covered = false
+        for i in 1:length(sensors)
+            if in_range(p, sensors[i], dis[i])
+                covered = true
+            end
+        end
+        if covered == false
+            push!(uncovered, p)
+        end
+    end
+
+    return(uncovered)
+
+end
+
+function tuning_frequency(point)
+    (x, y) = point
+    return(4000000*x + y)
+end
+
+f = readlines("day15.txt")
+t = readlines("test.txt")
+
+#Part 1
 (sensors, beacons) = locations(f)
-ranges = map_locations(sensors, beacons)
+b2=2000000
+ranges = map(sensors, beacons, b2)
 println("Part 1:", covered_blocks(ranges))
+
+
+#Part 2
+lmax = 4000000
+d = cityblock.(sensors, beacons)
+b_loc = find_beacon(sensors, d, lmax)
+println("Part 2: ", tuning_frequency(b_loc))
