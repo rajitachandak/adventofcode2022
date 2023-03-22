@@ -30,12 +30,19 @@ end
 
 function find_paths(network::Dict{String, Tunnel}, time::Int)
     checked = []
-    unchecked = Vector{Vector{String}}[["AA"]]
+    unchecked = Vector[["AA"]]
+    len = length(keys(network))
 
-    while length(unchecked) > 0
+    t=0
+
+    while length(unchecked) > 0 && t<=time
         current = popfirst!(unchecked)
 
-        if all([n[a].isopen for a in current])
+        if length(unique(current)) == len
+            push!(checked, current)
+        end
+
+        if all([network[a].isopen for a in keys(network)])
             push!(checked, current)
         end
 
@@ -43,18 +50,23 @@ function find_paths(network::Dict{String, Tunnel}, time::Int)
         if connected.isopen == false && connected.flow > 0
             connected.isopen = true
         end
+
         for n in connected.neighbours
-            push!(current, n)
-            println(current)
-            push!(unchecked, current)
-            pop!(current)
+            new_path = deepcopy(current)
+            push!(new_path, n)
+            push!(unchecked, new_path)
         end
+
+        t +=1
 
     end
 
+    return(unchecked)
 
 end
 
 f = readlines("day16.txt")
+t = readlines("test.txt")
 
 network = build_network(f)
+find_paths(network, 30)
