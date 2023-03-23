@@ -28,36 +28,51 @@ function build_network(f::Vector{String})
     return(network)
 end
 
+function cycling_path(path::Vector{String})
+    n = length(path)
+    l = trunc(Int, floor(n/2))
+
+    for i in 2:l
+        for j in 0:(n-2*i)
+            if path[1+j:i+j] == path[i+j+1:2*i+j]
+                return true
+            end
+        end
+    end
+
+    return false
+
+end
+
 function find_paths(network::Dict{String, Tunnel}, time::Int)
     checked = []
     unchecked = Vector[["AA"]]
-    len = length(keys(network))
 
-    t=0
+    t = 0
+    flow = 0
 
-    while length(unchecked) > 0 && t<=time
+    while length(unchecked) > 0
         current = popfirst!(unchecked)
 
-        if length(unique(current)) == len
-            push!(checked, current)
-        end
-
-        if all([network[a].isopen for a in keys(network)])
-            push!(checked, current)
-        end
-
         connected = network[current[end]]
-        if connected.isopen == false && connected.flow > 0
-            connected.isopen = true
-        end
 
         for n in connected.neighbours
             new_path = deepcopy(current)
             push!(new_path, n)
-            push!(unchecked, new_path)
+            #println(new_path)
+            if !cycling_path(new_path)
+                pushfirst!(unchecked, new_path)
+            else
+            #    println("cycling path")
+                continue
+            end
         end
 
-        t +=1
+        if length(unique(current)) == length(keys(network)) || length(current)==30
+            push!(checked, current)
+            #println(current)
+            #println("path completed")
+        end
 
     end
 
@@ -65,8 +80,10 @@ function find_paths(network::Dict{String, Tunnel}, time::Int)
 
 end
 
-f = readlines("day16.txt")
+#f = readlines("day16.txt")
 t = readlines("test.txt")
 
-network = build_network(f)
-find_paths(network, 30)
+network = build_network(t)
+#find_paths(network, 30)
+#path = ["AA", "BB", "II", "JJ", "FF",  "II", "JJ", "II", "KK", "LL", "II", "JJ", "KK"#]
+#cycling_path(path)
