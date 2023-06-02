@@ -40,6 +40,33 @@ function build_network(f::Vector{String})
     return(grid, network)
 end
 
+function shortest_path(grid::Matrix, start::Int)
+    n = size(grid)[1]
+    visited = fill(false, n)
+    len = fill(Inf, n)
+    len[start] = 0
+    done = false
+
+    while !done
+        min_unvisit = minimum([len[i] for i in 1:n if !visited[i]])
+        curr = findfirst(l -> (len[l]==min_unvisit &&  !visited[l]), 1:n)
+
+        for node in 1:n
+            if node != curr
+                dis = grid[curr, node]
+                if dis > 0
+                    len[node] = min(len[curr]+dis, len[node])
+                    end
+            end
+        end
+
+        visited[curr] = true
+        done = all(visited)
+    end
+
+    return(len)
+
+end
 function find_paths(network::Dict{String, Tunnel}, time::Int)
     checked = []
     unchecked = Vector[["AA"]]
