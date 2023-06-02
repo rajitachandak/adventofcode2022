@@ -7,41 +7,37 @@ end
 function build_network(f::Vector{String})
 
     network = Dict{String, Tunnel}()
+    n = length(f)
 
-    for l in f
+    ind = Dict{String, Int}()
+
+    grid = Matrix{Int}(undef, n, n)
+    grid .= 0
+
+    for i in 1:n
+        l = f[i]
+        substr = split(l, " ")
+        ind[substr[2]] = i
+    end
+
+    for i in 1:n
+        l = f[i]
         substr = split(l, " ")
         flow = parse(Int, strip(substr[5], ['r','a','t','e','=', ';']))
-        if flow == 0
-            t = Tunnel(flow, true, String[])
-        else
-            t = Tunnel(flow, false, String[])
-        end
+        t = Tunnel(flow, false, String[])
         connected = substr[10:end]
-        for i in connected
-            v = strip(i, ',')
+        ind[substr[2]] = i
+        for j in connected
+            v = strip(j, ',')
             push!(t.neighbours, v)
+            grid[i, ind[v]] = 1
         end
 
         network[substr[2]] = t
     end
 
-    return(network)
-end
 
-function cycling_path(path::Vector{String})
-    n = length(path)
-    l = trunc(Int, floor(n/2))
-
-    for i in 2:l
-        for j in 0:(n-2*i)
-            if path[1+j:i+j] == path[i+j+1:2*i+j]
-                return true
-            end
-        end
-    end
-
-    return false
-
+    return(grid, network)
 end
 
 function find_paths(network::Dict{String, Tunnel}, time::Int)
@@ -49,23 +45,32 @@ function find_paths(network::Dict{String, Tunnel}, time::Int)
     unchecked = Vector[["AA"]]
 
     t = 0
-    flow = 0
 
-    while length(unchecked) > 0
+    while length(unchecked) > 0 && t < 30
+        println(length(unchecked))
+        display(unchecked)
+
         current = popfirst!(unchecked)
 
+        display(unchecked)
+
         connected = network[current[end]]
+
+        println(connected)
 
         for n in connected.neighbours
             new_path = deepcopy(current)
             push!(new_path, n)
-            #println(new_path)
-            if !cycling_path(new_path)
-                pushfirst!(unchecked, new_path)
-            else
-            #    println("cycling path")
-                continue
+
+            println(new_path)
+
+            if network[n].flow > 0
+                flow += network[n].flow * (30 - length(new_path))
+
+                println(flow)
+
             end
+            push!(unchecked, new_path)
         end
 
         if length(unique(current)) == length(keys(network)) || length(current)==30
@@ -74,16 +79,16 @@ function find_paths(network::Dict{String, Tunnel}, time::Int)
             #println("path completed")
         end
 
+        t = t+1
     end
 
-    return(unchecked)
+    println()
+    return(checked)
 
 end
 
 #f = readlines("day16.txt")
 t = readlines("test.txt")
 
-network = build_network(t)
-#find_paths(network, 30)
-#path = ["AA", "BB", "II", "JJ", "FF",  "II", "JJ", "II", "KK", "LL", "II", "JJ", "KK"#]
-#cycling_path(path)
+grid, network = build_network(t)
+#p = find_paths(network, 30)
