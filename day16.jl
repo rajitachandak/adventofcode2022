@@ -67,6 +67,28 @@ function shortest_path(grid::Matrix, start::Int)
     return(len)
 
 end
+
+function all_paths(grid::Matrix)
+
+    n = size(grid)[1]
+    paths = Matrix{Int}(undef, n, n)
+    println(grid)
+
+    for i in 1:n
+        lenths = Int.(shortest_path(grid, Int(i)))
+        for j in 1:n
+            if i != j
+                paths[i, j] = Int(lenths[j])
+            else
+                paths[i, j] = 0
+            end
+        end
+    end
+
+    return(paths)
+
+end
+
 function find_paths(network::Dict{String, Tunnel}, time::Int)
     checked = []
     unchecked = Vector[["AA"]]
@@ -118,4 +140,5 @@ end
 t = readlines("test.txt")
 
 grid, network = build_network(t)
+all_paths(grid)
 #p = find_paths(network, 30)
