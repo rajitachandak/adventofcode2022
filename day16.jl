@@ -89,6 +89,34 @@ function all_paths(grid::Matrix)
 
 end
 
+function remove_zeros(grid::Matrix, network::Dict)
+
+    key_list = collect(keys(network))
+    non_zero_ind = []
+    new_network = Dict{String, Tunnel}()
+
+    for i in 1:length(key_list)
+        println(i)
+        k = key_list[i]
+        if network[k].flow !=0 || k == "AA"
+            push!(non_zero_ind, i)
+            new_network[k] = network[k]
+        end
+    end
+
+    n = length(non_zero_ind)
+    new_grid = Matrix{Int}(undef, n, n)
+
+    for i in 1:n
+        for j in 1:n
+            new_grid[i, j] = grid[non_zero_in[i], non_zero_ind[j]]
+        end
+    end
+
+
+
+end
+
 function find_paths(network::Dict{String, Tunnel}, time::Int)
     checked = []
     unchecked = Vector[["AA"]]
