@@ -105,14 +105,14 @@ function remove_zeros(grid::Matrix, network::Dict)
     end
 
     n = length(non_zero_ind)
-    new_grid = Matrix{Int}(undef, n, n)
+    new_grid = Matrix(undef, n, n)
 
     for i in 1:n
         for j in 1:n
-            new_grid[i, j] = grid[non_zero_in[i], non_zero_ind[j]]
+            new_grid[i, j] = grid[non_zero_ind[i], non_zero_ind[j]]
+            println(grid[non_zero_ind[i], non_zero_ind[j]])
         end
     end
-
 
 
 end
