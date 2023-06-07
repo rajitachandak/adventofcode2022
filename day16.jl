@@ -1,14 +1,12 @@
-#TODO: change struct type
-mutable struct Tunnel
-    flow::Int
-    isopen::Bool
-    neighbours::Vector{String}
+mutable struct Status
+    isopen::Vector{Bool}
+    time::Int
+    pressure::Int
+    curr_pos::Int
 end
 
-#TODO: Change input parsing
 function build_network(f::Vector{String})
 
-    network = Dict{String, Tunnel}()
     n = length(f)
 
     ind = Dict{String, Int}()
@@ -17,6 +15,8 @@ function build_network(f::Vector{String})
     grid .= 0
 
     valves = Vector{Int}(undef, n)
+    isopen = Vector{Bool}(undef, n)
+    isopen .= false
 
     for i in 1:n
         l = f[i]
@@ -41,8 +41,9 @@ function build_network(f::Vector{String})
         network[substr[2]] = t
     end
 
+    status = Status(isopen, 0, 0, ind["AA"])
 
-    return(valves, grid, network, ind["AA"])
+    return(valves, grid, status, ind["AA"])
 end
 
 function shortest_path(grid::Matrix, start::Int)
@@ -96,16 +97,18 @@ function all_paths(pipes::Vector, grid::Matrix)
 
 end
 
-function remove_zeros(pipes::Vector, grid::Matrix)
+function remove_zeros(pipes::Vector, grid::Matrix, status::Status)
 
     n = length(pipes)
     non_zero_ind = [i for i in 1:n if pipes[i] != 0 || i == 1]
     nz = length(non_zero_ind)
     new_pipes = Vector{Int}(undef, nz)
     new_grid = Matrix{Int}(undef, nz, nz)
+    new_isopen = Vector{Int}(undef, nz)
 
     for i in 1:nz
         new_pipes[i] = pipes[non_zero_ind[i]]
+        new_isopen[i] = status.isopen[non_zero_ind[i]]
     end
 
     for i in 1:nz
@@ -114,12 +117,26 @@ function remove_zeros(pipes::Vector, grid::Matrix)
         end
     end
 
-    return (new_pipes, new_grid)
+    new_status = Status(new_isopen, status.time, status.pressure, status.curr_pos)
+    return (new_pipes, new_grid, new_status)
 
 end
 
-function increment(state, pipes::Vector, grid::Matrix, network::Dict, time_lim::Int)
+function increment(loc, pipes::Vector, grid::Matrix, status::Status, time_lim::Int)
     n = length(pipes)
+
+    if loc == status.curr_pos
+        time = status.time + 1
+    else
+        l = grid[status.curr_pos, loc]
+        time = status.time + l + 1
+    end
+
+    pressure = status.pressure + pipes[loc]*max(time_lim-time, 0)
+    open = copy(status.isopen)
+    open[loc] = true
+
+    new_status = Status(open, time, pressure, loc)
 
 end
 
@@ -135,7 +152,7 @@ end
 #f = readlines("day16.txt")
 t = readlines("test.txt")
 
-pipes, grid, network, AA = build_network(t)
+pipes, grid, status, AA = build_network(t)
 grid = all_paths(grid)
-(pipes, grid) = remove_zeros(pipes, grid)
+(pipes, grid, status) = remove_zeros(pipes, grid, status)
 #p = find_paths(network, 30)
