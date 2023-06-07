@@ -1,9 +1,11 @@
+#TODO: change struct type
 mutable struct Tunnel
     flow::Int
     isopen::Bool
     neighbours::Vector{String}
 end
 
+#TODO: Change input parsing
 function build_network(f::Vector{String})
 
     network = Dict{String, Tunnel}()
@@ -13,6 +15,8 @@ function build_network(f::Vector{String})
 
     grid = Matrix{Int}(undef, n, n)
     grid .= 0
+
+    valves = Vector{Int}(undef, n)
 
     for i in 1:n
         l = f[i]
@@ -24,6 +28,7 @@ function build_network(f::Vector{String})
         l = f[i]
         substr = split(l, " ")
         flow = parse(Int, strip(substr[5], ['r','a','t','e','=', ';']))
+        valves[i] = flow
         t = Tunnel(flow, false, String[])
         connected = substr[10:end]
         ind[substr[2]] = i
@@ -37,10 +42,11 @@ function build_network(f::Vector{String})
     end
 
 
-    return(grid, network)
+    return(valves, grid, network, ind["AA"])
 end
 
 function shortest_path(grid::Matrix, start::Int)
+
     n = size(grid)[1]
     visited = fill(false, n)
     len = fill(Inf, n)
@@ -68,17 +74,18 @@ function shortest_path(grid::Matrix, start::Int)
 
 end
 
-function all_paths(grid::Matrix)
+function all_paths(pipes::Vector, grid::Matrix)
 
-    n = size(grid)[1]
+    n = length(pipes)
+    println(n)
     paths = Matrix{Int}(undef, n, n)
-    println(grid)
 
     for i in 1:n
-        lenths = Int.(shortest_path(grid, Int(i)))
+        ls = shortest_path(grid, Int(i))
+        #println(shortest_path(grid, Int(i)))
         for j in 1:n
             if i != j
-                paths[i, j] = Int(lenths[j])
+                paths[i, j] = Int(ls[j])
             else
                 paths[i, j] = 0
             end
@@ -89,84 +96,46 @@ function all_paths(grid::Matrix)
 
 end
 
-function remove_zeros(grid::Matrix, network::Dict)
+function remove_zeros(pipes::Vector, grid::Matrix)
 
-    key_list = collect(keys(network))
-    non_zero_ind = []
-    new_network = Dict{String, Tunnel}()
+    n = length(pipes)
+    non_zero_ind = [i for i in 1:n if pipes[i] != 0 || i == 1]
+    nz = length(non_zero_ind)
+    new_pipes = Vector{Int}(undef, nz)
+    new_grid = Matrix{Int}(undef, nz, nz)
 
-    for i in 1:length(key_list)
-        println(i)
-        k = key_list[i]
-        if network[k].flow !=0 || k == "AA"
-            push!(non_zero_ind, i)
-            new_network[k] = network[k]
-        end
+    for i in 1:nz
+        new_pipes[i] = pipes[non_zero_ind[i]]
     end
 
-    n = length(non_zero_ind)
-    new_grid = Matrix(undef, n, n)
-
-    for i in 1:n
-        for j in 1:n
+    for i in 1:nz
+        for j in 1:nz
             new_grid[i, j] = grid[non_zero_ind[i], non_zero_ind[j]]
-            println(grid[non_zero_ind[i], non_zero_ind[j]])
         end
     end
 
+    return (new_pipes, new_grid)
 
 end
 
-function find_paths(network::Dict{String, Tunnel}, time::Int)
+function increment(state, pipes::Vector, grid::Matrix, network::Dict, time_lim::Int)
+    n = length(pipes)
+
+end
+
+function pressure(pipes::Vector, grid::Matrix, network::Dict, time_lim::Int)
+
+    n = length(pipes)
     checked = []
-    unchecked = Vector[["AA"]]
+    p = 0
 
-    t = 0
-
-    while length(unchecked) > 0 && t < 30
-        println(length(unchecked))
-        display(unchecked)
-
-        current = popfirst!(unchecked)
-
-        display(unchecked)
-
-        connected = network[current[end]]
-
-        println(connected)
-
-        for n in connected.neighbours
-            new_path = deepcopy(current)
-            push!(new_path, n)
-
-            println(new_path)
-
-            if network[n].flow > 0
-                flow += network[n].flow * (30 - length(new_path))
-
-                println(flow)
-
-            end
-            push!(unchecked, new_path)
-        end
-
-        if length(unique(current)) == length(keys(network)) || length(current)==30
-            push!(checked, current)
-            #println(current)
-            #println("path completed")
-        end
-
-        t = t+1
-    end
-
-    println()
-    return(checked)
 
 end
 
 #f = readlines("day16.txt")
 t = readlines("test.txt")
 
-grid, network = build_network(t)
-all_paths(grid)
+pipes, grid, network, AA = build_network(t)
+grid = all_paths(grid)
+(pipes, grid) = remove_zeros(pipes, grid)
 #p = find_paths(network, 30)
