@@ -29,16 +29,13 @@ function build_network(f::Vector{String})
         substr = split(l, " ")
         flow = parse(Int, strip(substr[5], ['r','a','t','e','=', ';']))
         valves[i] = flow
-        t = Tunnel(flow, false, String[])
         connected = substr[10:end]
         ind[substr[2]] = i
         for j in connected
             v = strip(j, ',')
-            push!(t.neighbours, v)
             grid[i, ind[v]] = 1
         end
 
-        network[substr[2]] = t
     end
 
     status = Status(isopen, 0, 0, ind["AA"])
@@ -78,12 +75,10 @@ end
 function all_paths(pipes::Vector, grid::Matrix)
 
     n = length(pipes)
-    println(n)
     paths = Matrix{Int}(undef, n, n)
 
     for i in 1:n
         ls = shortest_path(grid, Int(i))
-        #println(shortest_path(grid, Int(i)))
         for j in 1:n
             if i != j
                 paths[i, j] = Int(ls[j])
@@ -100,15 +95,19 @@ end
 function remove_zeros(pipes::Vector, grid::Matrix, status::Status)
 
     n = length(pipes)
-    non_zero_ind = [i for i in 1:n if pipes[i] != 0 || i == 1]
+    non_zero_ind = [i for i in 1:n if pipes[i] != 0 || i == status.curr_pos]
     nz = length(non_zero_ind)
     new_pipes = Vector{Int}(undef, nz)
     new_grid = Matrix{Int}(undef, nz, nz)
     new_isopen = Vector{Int}(undef, nz)
+    new_curr_pos = status.curr_pos
 
     for i in 1:nz
         new_pipes[i] = pipes[non_zero_ind[i]]
         new_isopen[i] = status.isopen[non_zero_ind[i]]
+        if non_zero_ind[i] == status.curr_pos
+            new_curr_pos = i
+        end
     end
 
     for i in 1:nz
@@ -117,7 +116,7 @@ function remove_zeros(pipes::Vector, grid::Matrix, status::Status)
         end
     end
 
-    new_status = Status(new_isopen, status.time, status.pressure, status.curr_pos)
+    new_status = Status(new_isopen, status.time, status.pressure, new_curr_pos)
     return (new_pipes, new_grid, new_status)
 
 end
@@ -140,19 +139,35 @@ function increment(loc, pipes::Vector, grid::Matrix, status::Status, time_lim::I
 
 end
 
-function pressure(pipes::Vector, grid::Matrix, network::Dict, time_lim::Int)
+function pressure(pipes::Vector, grid::Matrix, status::Status, time_lim::Int)
 
     n = length(pipes)
-    checked = []
+    tocheck = [status]
     p = 0
+    while length(tocheck)>0
+        s = pop!(tocheck)
+        for i in 1:n
+            if !s.isopen[i]
+                s_update = increment(i, pipes, grid, s, time_lim)
+                if s_update.time <= time_lim
+                    push!(tocheck, s_update)
+                    if s_update.pressure > p
+                        p = s_update.pressure
+                    end
+                end
+            end
+        end
+    end
 
-
+    return(p)
 end
 
-#f = readlines("day16.txt")
+f = readlines("day16.txt")
 t = readlines("test.txt")
 
-pipes, grid, status, AA = build_network(t)
-grid = all_paths(grid)
+pipes, grid, status, AA = build_network(f)
+grid = all_paths(pipes, grid)
 (pipes, grid, status) = remove_zeros(pipes, grid, status)
-#p = find_paths(network, 30)
+
+p = pressure(pipes, grid, status, 30)
+println("Part 1: ", p)
