@@ -5,6 +5,11 @@ mutable struct Status
     curr_pos::Int
 end
 
+mutable struct Route
+    path::Vector{Int}
+    pressure::Int
+end
+
 function build_network(f::Vector{String})
 
     n = length(f)
@@ -162,12 +167,67 @@ function pressure(pipes::Vector, grid::Matrix, status::Status, time_lim::Int)
     return(p)
 end
 
+function get_routes(pipes::Vector, grid::Matrix, status::Status, time_lim::Int, min_pressure::Int)
+
+    n = length(pipes)
+    all_routes = Route[]
+    route = Route([status.curr_pos], status.pressure)
+    tocheck = Tuple{Status, Route}[(status, route)]
+
+    while length(tocheck)>0
+        (s, r) = pop!(tocheck)
+        for i in 1:n
+            if !s.isopen[i]
+                s_update = increment(i, pipes, grid, s, time_lim)
+                if s_update.time <= time_lim
+                    r_update = Route([r.path; i], s_update.pressure)
+                    push!(tocheck, (s_update, r_update))
+                end
+                if s_update.pressure > min_pressure
+                    r_update = Route([r.path; i], s_update.pressure)
+                    push!(all_routes, r_update)
+                end
+            end
+        end
+    end
+
+    return(all_routes)
+end
+
+function joint_pressure(all_routes::Vector{Route})
+
+    n = length(all_routes)
+    p = 0
+
+    for i in 1:n
+        for j in 1:n
+            if i>j
+                r1 = all_routes[i]
+                r2 = all_routes[j]
+                total_p = r1.pressure + r2.pressure
+                if length(intersect(r1.path[2:end], r2.path[2:end])) == 0
+                    if total_p > p
+                        p = total_p
+                    end
+                end
+            end
+        end
+    end
+
+    return(p)
+
+end
+
 f = readlines("day16.txt")
 t = readlines("test.txt")
 
-pipes, grid, status, AA = build_network(f)
+pipes, grid, status, AA = build_network(t)
 grid = all_paths(pipes, grid)
 (pipes, grid, status) = remove_zeros(pipes, grid, status)
 
 p = pressure(pipes, grid, status, 30)
 println("Part 1: ", p)
+
+all_routes = get_routes(pipes, grid, status, 26, 1000)
+part2 = joint_pressure(all_routes)
+println("Part 2: ", part2)
