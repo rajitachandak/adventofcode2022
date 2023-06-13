@@ -201,13 +201,19 @@ function joint_pressure(all_routes::Vector{Route})
 
     for i in 1:n
         for j in 1:n
-            if i>j
+            if i<j
                 r1 = all_routes[i]
                 r2 = all_routes[j]
                 total_p = r1.pressure + r2.pressure
-                if length(intersect(r1.path[2:end], r2.path[2:end])) == 0
-                    if total_p > p
-                        p = total_p
+                p1 = r1.path
+                p2 = r2.path
+                #p1_disjoint = deleteat!(p1, p1.==1)
+                #p2_disjoint = deleteat!(p2, p2.==1)
+                if total_p > p
+                    if length(intersect(p1[2:end], p2[2:end])) == 0
+                        if total_p > p
+                            p = total_p
+                        end
                     end
                 end
             end
@@ -221,13 +227,13 @@ end
 f = readlines("day16.txt")
 t = readlines("test.txt")
 
-pipes, grid, status, AA = build_network(t)
+pipes, grid, status, AA = build_network(f)
 grid = all_paths(pipes, grid)
 (pipes, grid, status) = remove_zeros(pipes, grid, status)
 
 p = pressure(pipes, grid, status, 30)
 println("Part 1: ", p)
 
-all_routes = get_routes(pipes, grid, status, 26, 1000)
+all_routes = get_routes(pipes, grid, status, 26, 1100)
 part2 = joint_pressure(all_routes)
 println("Part 2: ", part2)
